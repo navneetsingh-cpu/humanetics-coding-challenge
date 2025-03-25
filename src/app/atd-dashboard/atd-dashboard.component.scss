@@ -70,9 +70,11 @@
 }
 
 .right-section {
-    background-color: #4CAF50;
+    background-color: #f2f2f2;
     /* Green */
     color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .flex-center {

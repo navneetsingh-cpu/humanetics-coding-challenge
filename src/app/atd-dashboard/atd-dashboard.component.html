@@ -59,7 +59,25 @@
 
     <div class="right-section">
         <!-- Content for the right section -->
-        <h1>Right Section</h1>
-        <p>This is the right half of the screen.</p>
+        <div>
+            <mat-form-field appearance="outline" class="time-select">
+                <mat-label>Time Range</mat-label>
+                <mat-select [(value)]="selectedRange">
+                    @for (range of timeRanges; track $index) {
+                    <mat-option [value]="range">
+                        {{ range.label }}
+                    </mat-option>
+                    }
+
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+
+        <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions"
+            style="width: 100%; height: 500px; display: block;"></highcharts-chart>
+
+
+
     </div>
 </div>

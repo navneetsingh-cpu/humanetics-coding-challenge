@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -8,20 +8,49 @@ import { STATUS, LineCoordinates, Sensor } from './atd-dashboard.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HighchartsChartModule } from 'highcharts-angular';
+import { MatSelectModule } from '@angular/material/select';
+import { io } from 'socket.io-client';
+import * as Highcharts from 'highcharts';
 
+const MaterialModles = [MatDividerModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule, MatFormFieldModule, MatInputModule, MatSelectModule]
 
-const MaterialModles = [MatDividerModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule, MatFormFieldModule, MatInputModule]
+interface SensorBatch {
+  timestamp: number;
+  sensors: { [key: string]: number };
+}
 
 @Component({
   selector: 'app-atd-dashboard',
   templateUrl: './atd-dashboard.component.html',
-  imports: [...MaterialModles, NgClass, ReactiveFormsModule],
+  imports: [...MaterialModles, NgClass, ReactiveFormsModule, HighchartsChartModule],
   styleUrls: ['./atd-dashboard.component.scss']
 })
-export class AtdDashboardComponent implements OnInit {
+export class AtdDashboardComponent implements OnInit, OnDestroy {
   status: string = 'GGGGGRYRG';
 
+  Highcharts: typeof Highcharts = Highcharts;
+  chartOptions: Highcharts.Options;
+  private chart: Highcharts.Chart | undefined;
+
+  socket = io('http://localhost:3000');
+  sensorSeriesMap: { [sensorId: string]: Highcharts.Series } = {};
+  maxPoints = 100;
+
   isRotating: boolean;
+
+  selectedRange: any;
+
+  timeRanges = [
+    { label: 'Last 30 seconds', durationMs: 30 * 1000 },
+    { label: 'Last 1 minute', durationMs: 60 * 1000 },
+    { label: 'Last 5 minutes', durationMs: 5 * 60 * 1000 },
+    { label: 'Last 1 hour', durationMs: 60 * 60 * 1000 },
+    { label: 'Last 1 day', durationMs: 24 * 60 * 60 * 1000 },
+    { label: 'Last 1 year', durationMs: 365 * 24 * 60 * 60 * 1000 },
+    { label: 'Last 5 years', durationMs: 5 * 365 * 24 * 60 * 60 * 1000 },
+  ];
+
 
   sensors: Sensor[] = [
     { x: 130, y: 20, tooltip: 'top of head' },   // 1 (top of head)
@@ -49,7 +78,28 @@ export class AtdDashboardComponent implements OnInit {
 
   atdString = new FormControl(this.status);
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {
+    this.chartOptions = {
+      chart: {
+        type: 'spline',
+        events: {
+          load: () => {
+            this.chart = Highcharts.charts[0];
+          },
+        },
+      },
+      title: { text: 'Real-time Sensor Data' },
+      xAxis: { type: 'datetime' },
+      yAxis: { title: { text: 'Sensor Value' } },
+      series: [
+        { name: 'Sensor 0', type: 'spline', data: [] },
+        { name: 'Sensor 1', type: 'spline', data: [] },
+        { name: 'Sensor 2', type: 'spline', data: [] },
+      ],
+    };
+  }
+
+
   ngOnInit(): void {
     this.codeForm = this.fb.group({
       atdString: [
@@ -60,6 +110,26 @@ export class AtdDashboardComponent implements OnInit {
         ]
       ]
     });
+
+    this.socket = io('http://localhost:3000');
+
+    this.socket.on('sensor-data-batch', (batch: SensorBatch[]) => {
+      batch.forEach((dataPoint) => {
+        const time = dataPoint.timestamp;
+
+        // For demo, we use 3 sensors
+        ['sensor_0', 'sensor_1', 'sensor_2'].forEach((sensorId, i) => {
+          const value = dataPoint.sensors[sensorId];
+          const series = this.chart?.series[i];
+          if (series) {
+            series.addPoint([time, value], false, series.data.length > 100); // smooth chart
+          }
+        });
+      });
+
+      this.chart?.redraw();
+    });
+
   }
 
   placeSensors() {
@@ -77,5 +147,11 @@ export class AtdDashboardComponent implements OnInit {
 
   toggleRotation() {
     this.isRotating = !this.isRotating;
+  }
+
+  ngOnDestroy(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   }
 }
