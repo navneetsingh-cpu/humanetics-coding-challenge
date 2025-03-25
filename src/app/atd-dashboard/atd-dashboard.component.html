@@ -2,7 +2,7 @@
     <div class="left-section">
         <!-- Content for the left section -->
         <div [ngClass]="{'dummy-container' : isRotating}">
-            <form [formGroup]="codeForm" (ngSubmit)="placeSensors()">
+            <form [formGroup]="codeForm" (ngSubmit)="placeSensors()" class="control-form flex-center">
                 <p><mat-form-field appearance="fill">
                         <mat-label>ATD String</mat-label>
 
