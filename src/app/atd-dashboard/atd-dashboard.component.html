@@ -2,16 +2,32 @@
     <div class="left-section">
         <!-- Content for the left section -->
         <div [ngClass]="{'dummy-container' : isRotating}">
+            <form [formGroup]="codeForm" (ngSubmit)="placeSensors()">
+                <p><mat-form-field appearance="fill">
+                        <mat-label>ATD String</mat-label>
 
-            <div class="flex-center toolbar">
-                <mat-form-field>
-                    <mat-label>ATD String</mat-label>
-                    <input matInput placeholder="Ex. GGGGGRYRG" [formControl]="atdString">
-                </mat-form-field>
+                        <input matInput placeholder="Ex. GGGGGRYRG" [formControlName]="'atdString'" required
+                            maxlength="9">
+
+                        @if(codeForm.get('atdString').hasError('required')){
+                        <mat-error>
+                            This field is required.
+                        </mat-error>
+                        }
+                        @if(codeForm.get('atdString').hasError('pattern')){
+                        <mat-error>
+                            Invalid format. Please enter a 9-character string using only G, R, and Y.
+                        </mat-error>
+                        }
+
+                    </mat-form-field></p>
                 <p><mat-slide-toggle (click)="toggleRotation()" class="rotation-toggle">Toggle
                         Rotation</mat-slide-toggle></p>
-                <button mat-flat-button (click)="placeSensors()">Place Sensors</button>
-            </div>
+                <button mat-flat-button (click)="placeSensors()" [disabled]="codeForm.invalid">Place Sensors</button>
+
+            </form>
+
+
             <svg class="atd-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet"
                 xmlns="http://www.w3.org/2000/svg">
 

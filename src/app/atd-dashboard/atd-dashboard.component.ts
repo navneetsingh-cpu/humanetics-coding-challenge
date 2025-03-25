@@ -7,12 +7,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { STATUS, LineCoordinates, Sensor } from './atd-dashboard.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+
+const MaterialModles = [MatDividerModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule, MatFormFieldModule, MatInputModule]
 
 @Component({
   selector: 'app-atd-dashboard',
   templateUrl: './atd-dashboard.component.html',
-  imports: [MatDividerModule, MatButtonModule, MatSlideToggleModule, NgClass, MatTooltipModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule],
+  imports: [...MaterialModles, NgClass, ReactiveFormsModule],
   styleUrls: ['./atd-dashboard.component.scss']
 })
 export class AtdDashboardComponent implements OnInit {
@@ -31,6 +34,7 @@ export class AtdDashboardComponent implements OnInit {
     { x: 130, y: 170, tooltip: 'pelvis' },  // 8 (pelvis)
     { x: 200, y: 200, tooltip: 'right foot' }   // 9 (right foot)
   ];
+  codeForm: FormGroup;
 
   lines: LineCoordinates[] = [
     { x1: 50, y1: 80, x2: 70, y2: 100 },
@@ -45,23 +49,24 @@ export class AtdDashboardComponent implements OnInit {
 
   atdString = new FormControl(this.status);
 
+  constructor(private fb: FormBuilder) { }
   ngOnInit(): void {
-    // this.placeSensors();
+    this.codeForm = this.fb.group({
+      atdString: [
+        this.status,
+        [
+          Validators.required,
+          Validators.pattern(/^[GRY]{9}$/)
+        ]
+      ]
+    });
   }
 
-
   placeSensors() {
-    this.status = this.atdString.value;
-    // this.sensors.forEach((sensor: Sensor, index: number) => {
-    //   sensor.status = this.status[index];
-    // })
-    console.log(this.sensors);
-
+    this.status = this.codeForm.get('atdString')?.value
   }
 
   getColor(code: STATUS): string {
-    console.log(code);
-
     switch (code) {
       case STATUS.OK: return '#4c7c34';
       case STATUS.BROKEN: return '#b41c24';

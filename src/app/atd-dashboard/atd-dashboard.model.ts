@@ -14,6 +14,5 @@ export interface LineCoordinates {
 export enum STATUS {
   OK = 'G',
   BROKEN = 'R',
-  UNSTABLE = 'Y',
-  UNAVAILABLE = 'NA'
+  UNSTABLE = 'Y'
 }
