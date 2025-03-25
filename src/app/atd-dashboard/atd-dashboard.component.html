@@ -60,14 +60,29 @@
     <div class="right-section">
         <!-- Content for the right section -->
         <div>
-            <mat-form-field appearance="outline" class="time-select">
+            <!-- Time Range Selector -->
+            <mat-form-field appearance="fill">
                 <mat-label>Time Range</mat-label>
-                <mat-select [(value)]="selectedRange">
-                    @for (range of timeRanges; track $index) {
-                    <mat-option [value]="range">
-                        {{ range.label }}
+                <mat-select [(ngModel)]="selectedTimeRange" (selectionChange)="onTimeRangeChange()">
+                    @for (key of timeRanges | keyvalue; track $index) {
+                    <mat-option [value]="key.key">
+                        {{ key.key }}
                     </mat-option>
                     }
+
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Sensor Selector -->
+            <mat-form-field appearance="fill" class="sensor-selector">
+                <mat-label>Select Sensors</mat-label>
+                <mat-select multiple [(ngModel)]="selectedSensors" (selectionChange)="onSensorSelectionChange()">
+                    @for (sensor of sensorsAvailable; track $index) {
+                    <mat-option [value]="sensor">
+                        {{ sensor }}
+                    </mat-option>
+                    }
+
 
                 </mat-select>
             </mat-form-field>

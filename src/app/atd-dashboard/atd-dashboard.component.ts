@@ -2,12 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { NgClass } from '@angular/common';
+import { KeyValuePipe, NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { STATUS, LineCoordinates, Sensor } from './atd-dashboard.model';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { MatSelectModule } from '@angular/material/select';
 import { io } from 'socket.io-client';
@@ -23,7 +23,7 @@ interface SensorBatch {
 @Component({
   selector: 'app-atd-dashboard',
   templateUrl: './atd-dashboard.component.html',
-  imports: [...MaterialModles, NgClass, ReactiveFormsModule, HighchartsChartModule],
+  imports: [...MaterialModles, NgClass, ReactiveFormsModule, HighchartsChartModule, FormsModule, KeyValuePipe],
   styleUrls: ['./atd-dashboard.component.scss']
 })
 export class AtdDashboardComponent implements OnInit, OnDestroy {
@@ -41,15 +41,20 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
 
   selectedRange: any;
 
-  timeRanges = [
-    { label: 'Last 30 seconds', durationMs: 30 * 1000 },
-    { label: 'Last 1 minute', durationMs: 60 * 1000 },
-    { label: 'Last 5 minutes', durationMs: 5 * 60 * 1000 },
-    { label: 'Last 1 hour', durationMs: 60 * 60 * 1000 },
-    { label: 'Last 1 day', durationMs: 24 * 60 * 60 * 1000 },
-    { label: 'Last 1 year', durationMs: 365 * 24 * 60 * 60 * 1000 },
-    { label: 'Last 5 years', durationMs: 5 * 365 * 24 * 60 * 60 * 1000 },
-  ];
+  private dataHistory: { [sensorId: string]: [number, number][] } = {}; // key: sensor, value: array of [time, value]
+  sensorsAvailable: string[] = Array.from({ length: 100 }, (_, i) => `sensor_${i}`);
+  selectedSensors: string[] = ['sensor_0', 'sensor_1', 'sensor_2'];
+  timeRanges: { [key: string]: number } = {
+    '30s': 30 * 1000,
+    '1m': 60 * 1000,
+    '5m': 5 * 60 * 1000,
+    '1h': 60 * 60 * 1000,
+    '1d': 24 * 60 * 60 * 1000,
+    '1w': 7 * 24 * 60 * 60 * 1000,
+    '1mo': 30 * 24 * 60 * 60 * 1000,
+    '1y': 365 * 24 * 60 * 60 * 1000,
+    '5y': 5 * 365 * 24 * 60 * 60 * 1000,
+  };
 
 
   sensors: Sensor[] = [
@@ -77,6 +82,7 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
   ];
 
   atdString = new FormControl(this.status);
+  selectedTimeRange = '1m'; // default to 1 minute
 
   constructor(private fb: FormBuilder) {
     this.chartOptions = {
@@ -111,25 +117,76 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
       ]
     });
 
+    this.initSocket();
+    this.updateChartSeries();
+
+  }
+
+  initSocket() {
     this.socket = io('http://localhost:3000');
 
     this.socket.on('sensor-data-batch', (batch: SensorBatch[]) => {
-      batch.forEach((dataPoint) => {
-        const time = dataPoint.timestamp;
+      const now = Date.now();
 
-        // For demo, we use 3 sensors
-        ['sensor_0', 'sensor_1', 'sensor_2'].forEach((sensorId, i) => {
+      batch.forEach((dataPoint) => {
+        const timestamp = dataPoint.timestamp;
+
+        this.selectedSensors.forEach((sensorId) => {
           const value = dataPoint.sensors[sensorId];
-          const series = this.chart?.series[i];
-          if (series) {
-            series.addPoint([time, value], false, series.data.length > 100); // smooth chart
-          }
+          if (value === undefined) return;
+
+          if (!this.dataHistory[sensorId]) this.dataHistory[sensorId] = [];
+          this.dataHistory[sensorId].push([timestamp, value]);
+
+          // Clean up old data beyond selected time range
+          const cutoff = now - this.timeRanges[this.selectedTimeRange];
+          this.dataHistory[sensorId] = this.dataHistory[sensorId].filter(d => d[0] >= cutoff);
         });
       });
 
-      this.chart?.redraw();
+      this.refreshChart();
+    });
+  }
+
+  updateChartSeries() {
+    if (!this.chart) return;
+
+    this.chart.update({
+      series: this.selectedSensors.map(sensorId => ({
+        name: sensorId,
+        type: 'spline',
+        data: this.dataHistory[sensorId] || [],
+      }))
+    }, true, true);
+  }
+
+  refreshChart() {
+    if (!this.chart) return;
+
+    this.selectedSensors.forEach((sensorId, index) => {
+      const data = this.dataHistory[sensorId] || [];
+      if (this.chart?.series[index]) {
+        this.chart.series[index].setData(data, false);
+      } else {
+        this.chart?.addSeries({ name: sensorId, type: 'spline', data }, false);
+      }
     });
 
+    // Remove unused series if sensors were deselected
+    while (this.chart.series.length > this.selectedSensors.length) {
+      this.chart.series[this.chart.series.length - 1].remove(false);
+    }
+
+    this.chart.redraw();
+  }
+
+  onSensorSelectionChange() {
+    this.updateChartSeries();
+  }
+
+  onTimeRangeChange() {
+    // trigger cleanup + update chart
+    this.refreshChart();
   }
 
   placeSensors() {
@@ -150,8 +207,6 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-    }
+    if (this.socket) this.socket.disconnect();
   }
 }
