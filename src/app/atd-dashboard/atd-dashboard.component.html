@@ -1,14 +1,16 @@
 <div class="container">
     <div class="left-section">
         <!-- Content for the left section -->
-
-
         <div [ngClass]="{'dummy-container' : isRotating}">
 
-
             <div class="flex-center toolbar">
-                <p><mat-slide-toggle (click)="toggleRotation()">Toggle Rotation</mat-slide-toggle></p>
-
+                <mat-form-field>
+                    <mat-label>ATD String</mat-label>
+                    <input matInput placeholder="Ex. GGGGGRYRG" [formControl]="atdString">
+                </mat-form-field>
+                <p><mat-slide-toggle (click)="toggleRotation()" class="rotation-toggle">Toggle
+                        Rotation</mat-slide-toggle></p>
+                <button mat-flat-button (click)="placeSensors()">Place Sensors</button>
             </div>
             <svg class="atd-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet"
                 xmlns="http://www.w3.org/2000/svg">
@@ -25,11 +27,13 @@
                 <!-- Sensor circles -->
                 @for (sensor of sensors; track sensor) {
                 <circle [attr.cx]="sensor.x" [attr.cy]="sensor.y" r="8" [attr.fill]="getColor(status[$index])"
-                    stroke="black" stroke-width="2" />
-                <text [attr.x]="sensor.x" [attr.y]="sensor.y + 5" font-size="12" text-anchor="middle" fill="black">
+                    [matTooltip]="sensor.tooltip" stroke="black" stroke-width="2" />
+                <text [attr.x]="sensor.x" [attr.y]="sensor.y + 5" font-size="12" text-anchor="middle" fill="black"
+                    [matTooltip]="sensor.tooltip">
                     {{ $index + 1 }}
                 </text>
                 }
+
 
             </svg>
         </div>
