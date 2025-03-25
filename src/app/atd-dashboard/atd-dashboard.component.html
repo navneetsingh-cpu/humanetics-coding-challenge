@@ -1,21 +1,38 @@
-<svg class="atd-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+<div class="container">
+    <div class="left-section">
+        <!-- Content for the left section -->
 
-    <!-- Stick figure lines -->
-    @for (line of lines; track line) {
-    <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" stroke="black"
-        stroke-width="2" />
-    }
+        <div class="dummy-container">
+            <svg class="atd-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet"
+                xmlns="http://www.w3.org/2000/svg">
 
-    <!-- Head (circle around sensor 1 and 2) -->
-    <circle [attr.cx]="130" [attr.cy]="45" r="30" stroke="black" fill="none" stroke-width="2" />
+                <!-- Stick figure lines -->
+                @for (line of lines; track line) {
+                <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" stroke="black"
+                    stroke-width="2" />
+                }
 
-    <!-- Sensor circles -->
-    @for (sensor of sensors; track sensor) {
-    <circle [attr.cx]="sensor.x" [attr.cy]="sensor.y" r="8" [attr.fill]="getColor(status[$index])" stroke="black"
-        stroke-width="2" />
-    <text [attr.x]="sensor.x" [attr.y]="sensor.y + 5" font-size="12" text-anchor="middle" fill="black">
-        {{ $index + 1 }}
-    </text>
-    }
+                <!-- Head (circle around sensor 1 and 2) -->
+                <circle [attr.cx]="130" [attr.cy]="45" r="30" stroke="black" fill="none" stroke-width="2" />
 
-</svg>
+                <!-- Sensor circles -->
+                @for (sensor of sensors; track sensor) {
+                <circle [attr.cx]="sensor.x" [attr.cy]="sensor.y" r="8" [attr.fill]="getColor(status[$index])"
+                    stroke="black" stroke-width="2" />
+                <text [attr.x]="sensor.x" [attr.y]="sensor.y + 5" font-size="12" text-anchor="middle" fill="black">
+                    {{ $index + 1 }}
+                </text>
+                }
+
+            </svg>
+        </div>
+    </div>
+
+    <mat-divider [vertical]="true"></mat-divider>
+
+    <div class="right-section">
+        <!-- Content for the right section -->
+        <h1>Right Section</h1>
+        <p>This is the right half of the screen.</p>
+    </div>
+</div>

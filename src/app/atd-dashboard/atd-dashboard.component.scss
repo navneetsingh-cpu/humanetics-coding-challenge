@@ -1,11 +1,16 @@
-.atd-container {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    margin: 0 auto;
-}
+/* Reset default margin and padding */
+// * {
+//     margin: 0;
+//     padding: 0;
+//     box-sizing: border-box;
+// }
+
+/* Ensure html and body take full height */
+// html,
+// body {
+//     height: 100vh;
+// }
+
 
 .sensor {
     width: 30px;
@@ -29,4 +34,57 @@
     display: block;
     margin: 0 auto;
     max-width: 100%;
+}
+
+.dummy-container {
+    margin: auto;
+    perspective: 1000px;
+    /* Creates a 3D space for the child element */
+}
+
+.dummy-container svg {
+    width: 100%;
+    transform-style: preserve-3d;
+    animation: rotateDummy 5s infinite linear;
+}
+
+@keyframes rotateDummy {
+    from {
+        transform: rotateY(0deg);
+    }
+
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+
+/* Container to hold both sections */
+.container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    /* 100% of the viewport height */
+}
+
+/* Left and right sections each take up 50% of the container */
+.left-section,
+.right-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Background colors for distinction */
+.left-section {
+    background-color: #f2f2f2;
+    /* Light gray */
+}
+
+.right-section {
+    background-color: #4CAF50;
+    /* Green */
+    color: white;
 }

@@ -1,8 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-atd-dashboard',
   templateUrl: './atd-dashboard.component.html',
+  imports: [MatDividerModule],
   styleUrls: ['./atd-dashboard.component.scss']
 })
 export class AtdDashboardComponent implements OnInit {
