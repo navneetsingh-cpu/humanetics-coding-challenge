@@ -119,23 +119,13 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
     this.codeForm = this.fb.group({
       atdString: [
         this.status,
-        [Validators.required, Validators.pattern(/^[GRY]{9}$/)] // must match 9-char G/R/Y
+        [Validators.required, Validators.pattern(/^[GRYgry]{9}$/)] // must match 9-char G/R/Y
       ]
     });
 
     this.setupChart();       // Init Highcharts config
     this.initSocket();       // Connect to WebSocket server
     this.listenToDataStream(); // Begin processing incoming data
-
-    this.convertInputToUpperCase();
-
-  }
-  convertInputToUpperCase() {
-    this.atdString.valueChanges.subscribe(value => {
-      if (value !== value.toUpperCase()) {
-        this.atdString.setValue(value.toUpperCase(), { emitEvent: false });
-      }
-    });
   }
 
   // Highcharts initial config with 3 placeholder series
@@ -258,7 +248,7 @@ export class AtdDashboardComponent implements OnInit, OnDestroy {
 
   // Map ATD sensor health status to color
   getColor(code: STATUS): string {
-    switch (code) {
+    switch (code.toUpperCase()) {
       case STATUS.OK: return '#4c7c34';
       case STATUS.BROKEN: return '#b41c24';
       case STATUS.UNSTABLE: return '#fcbc2b';
