@@ -1,14 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-atd-dashboard',
   templateUrl: './atd-dashboard.component.html',
-  imports: [MatDividerModule],
+  imports: [MatDividerModule, MatButtonModule, MatSlideToggleModule, NgClass],
   styleUrls: ['./atd-dashboard.component.scss']
 })
 export class AtdDashboardComponent implements OnInit {
+
   @Input() status: string = 'GGGGGRYRG'; // Default or bind from parent
+  isRotating: boolean;
 
   sensors = [
     { x: 130, y: 20 },   // 1 (top of head)
@@ -44,5 +49,9 @@ export class AtdDashboardComponent implements OnInit {
       case 'Y': return '#fcbc2b';
       default: return 'gray';
     }
+  }
+
+  toggleRotation() {
+    this.isRotating = !this.isRotating;
   }
 }

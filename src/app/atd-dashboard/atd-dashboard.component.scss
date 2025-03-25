@@ -1,17 +1,3 @@
-/* Reset default margin and padding */
-// * {
-//     margin: 0;
-//     padding: 0;
-//     box-sizing: border-box;
-// }
-
-/* Ensure html and body take full height */
-// html,
-// body {
-//     height: 100vh;
-// }
-
-
 .sensor {
     width: 30px;
     height: 30px;
@@ -87,4 +73,14 @@
     background-color: #4CAF50;
     /* Green */
     color: white;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.toolbar {
+    padding: 20px;
 }
