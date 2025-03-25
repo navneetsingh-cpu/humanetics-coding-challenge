@@ -1,0 +1,9 @@
+<div class="atd-container">
+    <div *ngFor="let sensor of sensors; let i = index" class="sensor" [ngStyle]="{
+           top: sensor.y + 'px',
+           left: sensor.x + 'px',
+           backgroundColor: getColor()(i)
+         }">
+        {{ i + 1 }}
+    </div>
+</div>

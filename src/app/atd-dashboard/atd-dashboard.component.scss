@@ -1,0 +1,21 @@
+.atd-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    margin: 0 auto;
+}
+
+.sensor {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border: 2px solid black;
+}
