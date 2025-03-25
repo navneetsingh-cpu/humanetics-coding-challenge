@@ -19,3 +19,14 @@
     color: white;
     border: 2px solid black;
 }
+
+
+.atd-svg {
+    height: 80vh;
+    /* 80% of viewport height */
+    width: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+}
